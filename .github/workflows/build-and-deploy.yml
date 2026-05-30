@@ -11,6 +11,7 @@ env:
   AZURE_WEBAPP_NAME: 'BackendActiviteitenPlanner20260529113158'
   PUBLISH_DIR: 'publish'
 
+
 jobs:
   build-and-deploy:
     name: Build and Deploy
