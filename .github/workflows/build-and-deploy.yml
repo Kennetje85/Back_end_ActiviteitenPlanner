@@ -11,6 +11,8 @@ env:
   AZURE_WEBAPP_NAME: 'Activiteitenplanner'
   AZURE_RESOURCE_GROUP: 'REDACTED_RESOURCE_GROUP'
   PUBLISH_DIR: 'publish'
+  # Project path relative to repo root (adjust if your .csproj is elsewhere)
+  PROJECT_PATH: 'Backend_ActiviteitenPlanner/Backend_ActiviteitenPlanner.csproj'
 
 jobs:
   build-and-deploy:
@@ -19,8 +21,6 @@ jobs:
 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-      # Project path relative to repo root - adjust if your .csproj is elsewhere
-      PROJECT_PATH: 'Backend_ActiviteitenPlanner/Backend_ActiviteitenPlanner.csproj'
 
     steps:
       - name: Checkout repository
@@ -42,7 +42,7 @@ jobs:
       - name: Build project
         run: dotnet build "${{ env.PROJECT_PATH }}" --configuration Release --no-restore
 
-      - name: Test (if you have tests in solution)
+      - name: Test (if applicable)
         run: |
           if dotnet test "${{ env.PROJECT_PATH }}" --list-tests >/dev/null 2>&1; then
             dotnet test "${{ env.PROJECT_PATH }}" --configuration Release --no-build --verbosity normal
