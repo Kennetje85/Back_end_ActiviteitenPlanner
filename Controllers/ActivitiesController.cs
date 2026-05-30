@@ -1,7 +1,10 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Backend_ActiviteitenPlanner.Controllers
 {
@@ -12,11 +15,30 @@ namespace Backend_ActiviteitenPlanner.Controllers
         private readonly AppDbContext _db;
         public ActivitiesController(AppDbContext db) => _db = db;
 
+        // GET api/activities
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Activity>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ActivityDto>>> GetAll()
         {
-            var items = await _db.Activities.AsNoTracking().ToListAsync();
-            return Ok(items);
+            var items = await _db.Activities
+                .AsNoTracking()
+                .Include(a => a.Polls)
+                .ToListAsync();
+
+            var dtos = items.Select(a => new ActivityDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                Description = a.Description,
+                Date = a.Date,
+                Time = a.Time,
+                Location = a.Location,
+                Image = a.Image,
+                CreatedByUserId = a.CreatedByUserId,
+                PollCount = a.Polls?.Count ?? 0,
+                AverageRating = a.Polls != null && a.Polls.Any() ? a.Polls.Average(p => p.Rating) : 0.0
+            }).ToList();
+
+            return Ok(dtos);
         }
 
         [HttpGet("{id:int}")]
@@ -36,15 +58,28 @@ namespace Backend_ActiviteitenPlanner.Controllers
         public async Task<ActionResult<Activity>> Create([FromBody] CreateActivityDto dto)
         {
             if (dto == null) return BadRequest("Body is required.");
-            if (string.IsNullOrWhiteSpace(dto.Title)) return BadRequest("Title is required.");
+
+            // automatic ModelState validation (ApiController)
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+            // Trim and defensive validation for whitespace-only values
+            dto.Location = dto.Location?.Trim();
+            if (string.IsNullOrWhiteSpace(dto.Location))
+            {
+                ModelState.AddModelError(nameof(dto.Location), "Location is required and must contain non-whitespace characters.");
+                return ValidationProblem(ModelState);
+            }
+
+            // Title defensive trim
+            dto.Title = dto.Title?.Trim();
 
             var activity = new Activity
             {
-                Title = dto.Title,
+                Title = dto.Title!,
                 Description = dto.Description ?? "",
                 Date = dto.Date ?? "",
                 Time = dto.Time ?? "",
-                Location = dto.Location ?? "",
+                Location = dto.Location,
                 Image = dto.Image ?? ""
             };
 
@@ -66,18 +101,35 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, Activity input)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateActivityDto dto)
         {
-            if (id != input.Id) return BadRequest();
+            if (dto == null) return BadRequest("Body is required.");
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
             var existing = await _db.Activities.FindAsync(id);
             if (existing == null) return NotFound();
 
-            existing.Title = input.Title;
-            existing.Description = input.Description;
-            existing.Date = input.Date;
-            existing.Time = input.Time;
-            existing.Location = input.Location;
-            existing.Image = input.Image;
+            if (!string.IsNullOrWhiteSpace(dto.Title)) { 
+                existing.Title = dto.Title;
+            }
+            if (dto.Description != null) existing.Description = dto.Description;
+            if (dto.Date != null) existing.Date = dto.Date;
+            if (dto.Time != null) existing.Time = dto.Time;
+
+            // If client provided Location, ensure it's not empty or whitespace and trim it
+            if (dto.Location != null)
+            {
+                var trimmed = dto.Location.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed))
+                {
+                    ModelState.AddModelError(nameof(dto.Location), "Location must not be empty when provided.");
+                    return ValidationProblem(ModelState);
+                }
+
+                existing.Location = trimmed;
+            }
+
+            if (dto.Image != null) existing.Image = dto.Image;
 
             await _db.SaveChangesAsync();
             return NoContent();
@@ -97,11 +149,18 @@ namespace Backend_ActiviteitenPlanner.Controllers
     // DTOs expected by the frontend
     public class CreateActivityDto
     {
+        [Required(ErrorMessage = "Title is required")]
         public string Title { get; set; } = null!;
+
         public string? Description { get; set; }
         public string? Date { get; set; }
         public string? Time { get; set; }
-        public string? Location { get; set; }
+
+        [Required(ErrorMessage = "Location is required")]
+        [MinLength(1, ErrorMessage = "Location must not be empty")]
+        [RegularExpression(@"\S+.*", ErrorMessage = "Location must contain non-whitespace characters")]
+        public string Location { get; set; } = null!;
+
         public string? Image { get; set; }
 
         // Accept either the numeric user id or the user's email (frontend choice)
@@ -115,7 +174,25 @@ namespace Backend_ActiviteitenPlanner.Controllers
         public string? Description { get; set; }
         public string? Date { get; set; }
         public string? Time { get; set; }
+
+        // Optional on update: when provided it must not be empty or whitespace
+        [MinLength(1, ErrorMessage = "Location must not be empty")]
+        [RegularExpression(@"\S+.*", ErrorMessage = "Location must contain non-whitespace characters")]
         public string? Location { get; set; }
         public string? Image { get; set; }
+    }
+
+    public class ActivityDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = null!;
+        public string Description { get; set; } = "";
+        public string Date { get; set; } = "";
+        public string Time { get; set; } = "";
+        public string Location { get; set; } = "";
+        public string Image { get; set; } = "";
+        public int? CreatedByUserId { get; set; }
+        public int PollCount { get; set; }
+        public double AverageRating { get; set; }
     }
 }

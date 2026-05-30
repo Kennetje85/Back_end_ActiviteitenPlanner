@@ -2,11 +2,23 @@
   "profiles": {
     "Backend_ActiviteitenPlanner": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JWT__Key": "f7dK2s9Vn3QyX8bH4pR6tJ1sL0mZ5yAq9uVwXc7Yz0="
       },
-      "applicationUrl": "https://localhost:50228;http://localhost:50229"
+      "applicationUrl": "http://localhost:5000;https://localhost:5001"
+    },
+    "Container (.NET SDK)": {
+      "commandName": "SdkContainer",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "ASPNETCORE_HTTPS_PORTS": "8081",
+        "ASPNETCORE_HTTP_PORTS": "8080"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
     }
   }
 }

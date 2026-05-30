@@ -5,15 +5,147 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <EnableSdkContainerDebugging>True</EnableSdkContainerDebugging>
+    <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:8.0</ContainerBaseImage>
+    <UserSecretsId>6889d597-bee5-473b-a5bd-27e9898908c1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Do not compile the Dockerfile as C# -->
+    <None Include=".github\workflows\build-and-deploy.yml" />
+    <None Include="bin\Debug\net8.0\Azure.Core.dll" />
+    <None Include="bin\Debug\net8.0\Azure.Identity.dll" />
+    <None Include="bin\Debug\net8.0\Backend_ActiviteitenPlanner.dll" />
+    <None Include="bin\Debug\net8.0\Backend_ActiviteitenPlanner.exe" />
+    <None Include="bin\Debug\net8.0\Backend_ActiviteitenPlanner.pdb" />
+    <None Include="bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\es\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\Humanizer.dll" />
+    <None Include="bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\it\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.CodeAnalysis.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.Data.SqlClient.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Design.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.Identity.Client.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.Identity.Client.Extensions.Msal.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.OpenApi.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.SqlServer.Server.dll" />
+    <None Include="bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll" />
+    <None Include="bin\Debug\net8.0\Mono.TextTemplating.dll" />
+    <None Include="bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll" />
+    <None Include="bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll" />
+    <None Include="bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll" />
+    <None Include="bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll" />
+    <None Include="bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll" />
+    <None Include="bin\Debug\net8.0\System.CodeDom.dll" />
+    <None Include="bin\Debug\net8.0\System.Composition.AttributedModel.dll" />
+    <None Include="bin\Debug\net8.0\System.Composition.Convention.dll" />
+    <None Include="bin\Debug\net8.0\System.Composition.Hosting.dll" />
+    <None Include="bin\Debug\net8.0\System.Composition.Runtime.dll" />
+    <None Include="bin\Debug\net8.0\System.Composition.TypedParts.dll" />
+    <None Include="bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll" />
+    <None Include="bin\Debug\net8.0\System.Drawing.Common.dll" />
+    <None Include="bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll" />
+    <None Include="bin\Debug\net8.0\System.Memory.Data.dll" />
+    <None Include="bin\Debug\net8.0\System.Runtime.Caching.dll" />
+    <None Include="bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll" />
+    <None Include="bin\Debug\net8.0\System.Security.Permissions.dll" />
+    <None Include="bin\Debug\net8.0\System.Windows.Extensions.dll" />
+    <None Include="bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll" />
+    <None Include="bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll" />
+    <None Include="bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll" />
+    <None Include="bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll" />
+    <None Include="Dockerfile" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.27" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ContainerPort Include="8081" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="bin\Debug\net8.0\Backend_ActiviteitenPlanner.deps.json" />
+    <Content Include="bin\Debug\net8.0\Backend_ActiviteitenPlanner.runtimeconfig.json" />
+    <Content Include="bin\Debug\net8.0\Backend_ActiviteitenPlanner.staticwebassets.endpoints.json" />
   </ItemGroup>
 
 </Project>

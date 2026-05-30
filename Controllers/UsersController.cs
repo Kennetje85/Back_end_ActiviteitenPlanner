@@ -1,9 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Backend_ActiviteitenPlanner.Controllers
 {
@@ -12,10 +20,16 @@ namespace Backend_ActiviteitenPlanner.Controllers
     public class UsersController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _config;
+        private readonly ILogger<UsersController> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public UsersController(AppDbContext context)
+        public UsersController(AppDbContext context, IConfiguration config, ILogger<UsersController> logger, IWebHostEnvironment env)
         {
             _context = context;
+            _config = config;
+            _logger = logger;
+            _env = env;
         }
 
         // POST api/users
@@ -51,46 +65,74 @@ namespace Backend_ActiviteitenPlanner.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] LoginDto dto)
         {
-            if (dto == null) return BadRequest("Missing body.");
-            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest("Email and Password are required.");
+            try
+            {
+                if (dto == null) return BadRequest("Missing body.");
+                if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
+                    return BadRequest("Email and Password are required.");
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-            if (user == null) return Unauthorized("Invalid credentials.");
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+                if (user == null) return Unauthorized("Invalid credentials.");
 
-            if (string.IsNullOrWhiteSpace(user.PasswordHash) || !VerifyPassword(dto.Password, user.PasswordHash))
-                return Unauthorized("Invalid credentials.");
+                if (string.IsNullOrWhiteSpace(user.PasswordHash) || !VerifyPassword(dto.Password, user.PasswordHash))
+                    return Unauthorized("Invalid credentials.");
 
-            // Successful login — do NOT return the password hash
-            return Ok(new { user.Id, user.Name, user.Email, user.Role });
-        }
+                // Create JWT
+                var jwtKey = _config["Jwt:Key"] ?? Environment.GetEnvironmentVariable("JWT__Key");
+                if (string.IsNullOrWhiteSpace(jwtKey))
+                {
+                    _logger.LogError("JWT key not configured. Set Jwt:Key or JWT__Key.");
+                    return Problem("Server configuration error: JWT key not configured.", statusCode: 500);
+                }
 
-        // Accept both POST and PUT for change-password to match frontend
-        [HttpPost("{id:int}/change-password")]
-        [HttpPut("{id:int}/change-password")]
-        public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDto dto)
-        {
-            if (dto == null) return BadRequest("Missing body.");
-            if (string.IsNullOrWhiteSpace(dto.OldPassword) || string.IsNullOrWhiteSpace(dto.NewPassword))
-                return BadRequest("OldPassword and NewPassword are required.");
+                var jwtIssuer = _config["Jwt:Issuer"] ?? "Backend_ActiviteitenPlanner";
+                var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+                var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
-            if (dto.NewPassword.Length < 6) // minimal check
-                return BadRequest("New password must be at least 6 characters.");
+                var claims = new List<Claim>
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                    new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
+                    new Claim(ClaimTypes.Role, user.Role ?? "user"),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                };
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null) return NotFound("User not found.");
+                var token = new JwtSecurityToken(
+                    issuer: jwtIssuer,
+                    audience: jwtIssuer,
+                    claims: claims,
+                    notBefore: DateTime.UtcNow,
+                    expires: DateTime.UtcNow.AddHours(8),
+                    signingCredentials: creds
+                );
 
-            if (string.IsNullOrWhiteSpace(user.PasswordHash) || !VerifyPassword(dto.OldPassword, user.PasswordHash))
-                return Unauthorized("Old password is incorrect.");
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-            user.PasswordHash = HashPassword(dto.NewPassword);
-            await _context.SaveChangesAsync();
+                // Return token + basic user info
+                return Ok(new
+                {
+                    token = tokenString,
+                    expires = token.ValidTo,
+                    user = new { user.Id, user.Name, user.Email, user.Role }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception in Login for {Email}", dto?.Email);
+                if (_env.IsDevelopment())
+                {
+                    // Return detailed error in Development only (temporary)
+                    return Problem(detail: ex.ToString(), title: ex.Message, statusCode: 500);
+                }
 
-            return NoContent();
+                return Problem("An unexpected error occurred while processing login.", statusCode: 500);
+            }
         }
 
         // GET api/users
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers([FromQuery] string? email = null)
         {
             if (!string.IsNullOrEmpty(email))
@@ -116,7 +158,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
             return Ok(new { user.Id, user.Name, user.Email, user.Role });
         }
 
-        // Simple PBKDF2 hashing; stored format = iterations.saltBase64.hashBase64
+        // Password helpers (PBKDF2)
         private static string HashPassword(string password)
         {
             const int iterations = 100_000;
@@ -133,7 +175,6 @@ namespace Backend_ActiviteitenPlanner.Controllers
             return $"{iterations}.{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
         }
 
-        // Verify password against stored hash in format iterations.salt.hash
         private static bool VerifyPassword(string password, string storedHash)
         {
             try
@@ -157,6 +198,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
     }
 
+    // DTOs
     public class CreateUserDto
     {
         public string Name { get; set; } = null!;
@@ -169,11 +211,5 @@ namespace Backend_ActiviteitenPlanner.Controllers
     {
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;
-    }
-
-    public class ChangePasswordDto
-    {
-        public string OldPassword { get; set; } = null!;
-        public string NewPassword { get; set; } = null!;
     }
 }

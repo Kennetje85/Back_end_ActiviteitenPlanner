@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Backend_ActiviteitenPlanner
 {
@@ -13,6 +14,7 @@ namespace Backend_ActiviteitenPlanner
         public string Description { get; set; } = "";
         public string Date { get; set; } = "";
         public string Time { get; set; } = "";
+        [Required]
         public string Location { get; set; } = "";
         public string Image { get; set; } = "";
         public int? CreatedByUserId { get; set; }

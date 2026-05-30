@@ -1,0 +1,49 @@
+name: Activiteitenplanner CI
+
+
+on: 
+    workflow_dispatch:
+    push:
+        branches: [ main ]
+
+
+env: 
+    AZURE_WEBAPP_NAME: 'Activiteitenplanner' # Set this to your application's name in Azure
+    DOTNET_VERSION: '8.0.x'
+    AZURE_WEBAPP_PACKAGE_PATH: './ActiviteitenPlanner.API/publish' # Path to the published application package
+    API_PROTECTION_PATH: "./ActiviteitenPlanner.API/publish"
+    SOLUTION_PATH: 'Backend_ActiviteitenPlanner.sln'
+    AZURE_RESOURCE_GROUP: 'REDACTED_RESOURCE_GROUP' # Set this to your Azure resource group name
+    PUBLISH_DIR: 'publish' # Directory to publish the application
+
+
+jobs:
+    build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest;
+
+
+    steps:
+        - uses: actions/checkout@v4
+          name: Setup .NET
+          with:
+              dotnet-version: ${{ env.DOTNET_VERSION }}
+
+        - name: Restore dependencies
+          run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+        - name: Build 
+          run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+
+        - name: Test
+          run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal
+        
+        - name: Publish API
+          run: dotnet publish ./ActiviteitenPlanner.API/ActiviteitenPlanner.API.csproj --configuration Release --output ${{ env.API_PROTECTION_PATH }} --no-build
+        
+        - name : Publish Artifact
+          uses: actions/upload-artifact@v4
+          with:
+              name: webapp
+              path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+           
