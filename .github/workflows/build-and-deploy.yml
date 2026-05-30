@@ -69,10 +69,12 @@ jobs:
           name: webapp
           path: ${{ env.PUBLISH_DIR }}
 
-      - name: Azure login
-        uses: azure/login@v2
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          app-name: Activiteitenplanner
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.PUBLISH_DIR }}
 
       - name: Deploy with az webapp deploy
         run: |
