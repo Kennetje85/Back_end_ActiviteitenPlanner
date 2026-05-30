@@ -9,9 +9,6 @@ env:
   ASPNETCORE_ENVIRONMENT: 'Production'
   DOTNET_VERSION: '8.0.x'
   AZURE_WEBAPP_NAME: 'Activiteitenplanner'
-  AZURE_WEBAPP_PACKAGE_PATH: './Backend_ActiviteitenPlanner/publish'
-  API_PROTECTION_PATH: './Backend_ActiviteitenPlanner/publish'
-  SOLUTION_PATH: 'Backend_ActiviteitenPlanner.sln'
   AZURE_RESOURCE_GROUP: 'REDACTED_RESOURCE_GROUP'
   PUBLISH_DIR: 'publish'
 
@@ -20,23 +17,29 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-latest
 
-    # Opt into Node.js 24 for JS actions at job level to avoid deprecation warning
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-      # If you later need to temporarily opt out you can set:
-      # ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Show runner Node version (debug)
+      - name: Find solution file
+        id: find_sln
         run: |
-          echo "----- node version -----"
-          node -v || echo "node not installed"
-          echo "----- npm version -----"
-          npm -v || echo "npm not installed"
-          echo "------------------------"
+          echo "Searching for first .sln in repository..."
+          SOL=$(find . -maxdepth 4 -name '*.sln' -print -quit)
+          if [ -z "$SOL" ]; then
+            echo "No .sln found in repository"
+            exit 1
+          fi
+          echo "Found solution: $SOL"
+          echo "SOLUTION_PATH=$SOL" >> $GITHUB_ENV
+
+      - name: Show discovered paths (debug)
+        run: |
+          echo "SOLUTION_PATH = $SOLUTION_PATH"
+          ls -la
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -44,17 +47,17 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore "${{ env.SOLUTION_PATH }}"
+        run: dotnet restore "$SOLUTION_PATH"
 
       - name: Build
-        run: dotnet build "${{ env.SOLUTION_PATH }}" --configuration ${{ env.BUILD_CONFIGURATION || 'Release' }} --no-restore
+        run: dotnet build "$SOLUTION_PATH" --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test "${{ env.SOLUTION_PATH }}" --configuration ${{ env.BUILD_CONFIGURATION || 'Release' }} --no-build --verbosity normal
+        run: dotnet test "$SOLUTION_PATH" --configuration Release --no-build --verbosity normal
 
       - name: Publish web project
         working-directory: Backend_ActiviteitenPlanner
-        run: dotnet publish Backend_ActiviteitenPlanner.csproj -c ${{ env.BUILD_CONFIGURATION || 'Release' }} -o ${{ env.PUBLISH_DIR }} /p:UseAppHost=false
+        run: dotnet publish Backend_ActiviteitenPlanner.csproj -c Release -o ${{ env.PUBLISH_DIR }} /p:UseAppHost=false
 
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
