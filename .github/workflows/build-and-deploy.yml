@@ -6,13 +6,19 @@ on:
     branches: [ main ]
 
 env:
-  AZURE_WEBAPP_NAME: 'Activiteitenplanner'
+  # Runtime / secrets (set secrets in repo settings, do NOT commit real secrets)
+  ASPNETCORE_ENVIRONMENT: 'Production'
   DOTNET_VERSION: '8.0.x'
+  AZURE_WEBAPP_NAME: 'Activiteitenplanner'
   AZURE_WEBAPP_PACKAGE_PATH: './Backend_ActiviteitenPlanner/publish'
   API_PROTECTION_PATH: './Backend_ActiviteitenPlanner/publish'
   SOLUTION_PATH: 'Backend_ActiviteitenPlanner.sln'
   AZURE_RESOURCE_GROUP: 'REDACTED_RESOURCE_GROUP'
   PUBLISH_DIR: 'publish'
+
+  # Opt in to Node.js 24 for JavaScript actions to avoid deprecation errors.
+  # Remove this once actions you use are published with native Node 24 support.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   build-and-deploy:
