@@ -11,8 +11,6 @@ env:
   AZURE_WEBAPP_NAME: 'Activiteitenplanner'
   AZURE_RESOURCE_GROUP: 'REDACTED_RESOURCE_GROUP'
   PUBLISH_DIR: 'publish'
-  # Project path relative to repo root (adjust if your .csproj is elsewhere)
-  PROJECT_PATH: 'Backend_ActiviteitenPlanner.csproj'
 
 jobs:
   build-and-deploy:
@@ -31,6 +29,18 @@ jobs:
           node -v || echo "node not installed"
           npm -v || echo "npm not installed"
 
+      - name: Find project file
+        id: find_csproj
+        run: |
+          echo "Searching for Backend_ActiviteitenPlanner.csproj..."
+          PROJ=$(find . -type f -name 'Backend_ActiviteitenPlanner.csproj' -print -quit)
+          if [ -z "$PROJ" ]; then
+            echo "No Backend_ActiviteitenPlanner.csproj found in repository."
+            exit 1
+          fi
+          echo "Found project: $PROJ"
+          echo "PROJECT_PATH=$PROJ" >> $GITHUB_ENV
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -47,22 +57,21 @@ jobs:
           if dotnet test "${{ env.PROJECT_PATH }}" --list-tests >/dev/null 2>&1; then
             dotnet test "${{ env.PROJECT_PATH }}" --configuration Release --no-build --verbosity normal
           else
-            echo "No test project found for ${PROJECT_PATH} - skipping tests"
+            echo "No tests found for ${{ env.PROJECT_PATH }} - skipping tests"
           fi
 
       - name: Publish web project
-        working-directory: Backend_ActiviteitenPlanner
-        run: dotnet publish Backend_ActiviteitenPlanner.csproj -c Release -o ${{ env.PUBLISH_DIR }} /p:UseAppHost=false
+        run: dotnet publish "${{ env.PROJECT_PATH }}" -c Release -o ${{ env.PUBLISH_DIR }} /p:UseAppHost=false
 
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
         with:
           name: webapp
-          path: Backend_ActiviteitenPlanner/${{ env.PUBLISH_DIR }}
+          path: ${{ env.PUBLISH_DIR }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: Backend_ActiviteitenPlanner/${{ env.PUBLISH_DIR }}
+          package: ${{ env.PUBLISH_DIR }}
