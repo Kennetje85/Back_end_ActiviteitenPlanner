@@ -6,7 +6,6 @@ on:
     branches: [ main ]
 
 env:
-  # Runtime / secrets (set secrets in repo settings, do NOT commit real secrets)
   ASPNETCORE_ENVIRONMENT: 'Production'
   DOTNET_VERSION: '8.0.x'
   AZURE_WEBAPP_NAME: 'Activiteitenplanner'
@@ -16,18 +15,28 @@ env:
   AZURE_RESOURCE_GROUP: 'REDACTED_RESOURCE_GROUP'
   PUBLISH_DIR: 'publish'
 
-  # Opt in to Node.js 24 for JavaScript actions to avoid deprecation errors.
-  # Remove this once actions you use are published with native Node 24 support.
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-
 jobs:
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
 
+    # Opt into Node.js 24 for JS actions at job level to avoid deprecation warning
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+      # If you later need to temporarily opt out you can set:
+      # ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Show runner Node version (debug)
+        run: |
+          echo "----- node version -----"
+          node -v || echo "node not installed"
+          echo "----- npm version -----"
+          npm -v || echo "npm not installed"
+          echo "------------------------"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
