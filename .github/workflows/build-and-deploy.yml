@@ -8,8 +8,7 @@ on:
 env:
   ASPNETCORE_ENVIRONMENT: 'Production'
   DOTNET_VERSION: '8.0.x'
-  AZURE_WEBAPP_NAME: 'Activiteitenplanner'
-  AZURE_RESOURCE_GROUP: 'REDACTED_RESOURCE_GROUP'
+  AZURE_WEBAPP_NAME: 'BackendActiviteitenPlanner20260529113158'
   PUBLISH_DIR: 'publish'
 
 jobs:
@@ -17,65 +16,33 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-latest
 
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Show runner Node version (debug)
-        run: |
-          node -v || echo "node not installed"
-          npm -v || echo "npm not installed"
-
-      - name: Find project file
-        id: find_csproj
-        run: |
-          echo "Searching for Backend_ActiviteitenPlanner.csproj..."
-          PROJ=$(find . -type f -name 'Backend_ActiviteitenPlanner.csproj' -print -quit)
-          if [ -z "$PROJ" ]; then
-            echo "No Backend_ActiviteitenPlanner.csproj found in repository."
-            exit 1
-          fi
-          echo "Found project: $PROJ"
-          echo "PROJECT_PATH=$PROJ" >> $GITHUB_ENV
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore project dependencies
-        run: dotnet restore "${{ env.PROJECT_PATH }}"
-
-      - name: Build project
-        run: dotnet build "${{ env.PROJECT_PATH }}" --configuration Release --no-restore
-
-      - name: Test (if applicable)
+      - name: Find project file
         run: |
-          if dotnet test "${{ env.PROJECT_PATH }}" --list-tests >/dev/null 2>&1; then
-            dotnet test "${{ env.PROJECT_PATH }}" --configuration Release --no-build --verbosity normal
-          else
-            echo "No tests found for ${{ env.PROJECT_PATH }} - skipping tests"
-          fi
+          PROJ=$(find . -name "*.csproj" | head -n 1)
+          echo "PROJECT_PATH=$PROJ" >> $GITHUB_ENV
+          echo "Found: $PROJ"
 
-      - name: Publish web project
-        run: dotnet publish "${{ env.PROJECT_PATH }}" -c Release -o ${{ env.PUBLISH_DIR }} /p:UseAppHost=false
+      - name: Restore
+        run: dotnet restore ${{ env.PROJECT_PATH }}
 
-      - name: Upload publish artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp
-          path: ${{ env.PUBLISH_DIR }}
+      - name: Build
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -o ${{ env.PUBLISH_DIR }} /p:UseAppHost=false
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-                app-name: BackendActiviteitenPlanner20260529113158
-                publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-                package: ${{ env.PUBLISH_DIR }}
-
-      - name: Deploy with az webapp deploy
-        run: |
-          az webapp deploy --resource-group <RESOURCE_GROUP> --name ${{ secrets.AZURE_WEBAPP_NAME }} --src-path ${{ env.PUBLISH_DIR }}
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.PUBLISH_DIR }}
