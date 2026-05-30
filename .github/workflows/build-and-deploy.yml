@@ -69,9 +69,11 @@ jobs:
           name: webapp
           path: ${{ env.PUBLISH_DIR }}
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
+      - name: Azure login
+        uses: azure/login@v2
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ env.PUBLISH_DIR }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy with az webapp deploy
+        run: |
+          az webapp deploy --resource-group <RESOURCE_GROUP> --name ${{ secrets.AZURE_WEBAPP_NAME }} --src-path ${{ env.PUBLISH_DIR }}
