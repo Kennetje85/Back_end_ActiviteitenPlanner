@@ -11,7 +11,6 @@ env:
   AZURE_WEBAPP_NAME: 'BackendActiviteitenPlanner20260529113158'
   PUBLISH_DIR: 'publish'
 
-
 jobs:
   build-and-deploy:
     name: Build and Deploy
@@ -30,16 +29,16 @@ jobs:
         run: |
           PROJ=$(find . -name "*.csproj" | head -n 1)
           echo "PROJECT_PATH=$PROJ" >> $GITHUB_ENV
-          echo "Found: $PROJ"
+          echo "Found project: $PROJ"
 
-      - name: Restore
+      - name: Restore dependencies
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
-      - name: Build
+      - name: Build project
         run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
 
-      - name: Publish
-        run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -o ${{ env.PUBLISH_DIR }} /p:UseAppHost=false
+      - name: Publish project
+        run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -o ${{ env.PUBLISH_DIR }} --no-build
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
