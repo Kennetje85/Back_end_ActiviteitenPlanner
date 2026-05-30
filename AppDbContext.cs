@@ -17,7 +17,6 @@ namespace Backend_ActiviteitenPlanner
         public DbSet<Registration> Registrations => Set<Registration>();
         public DbSet<Poll> Polls => Set<Poll>();
         public DbSet<LogEntry> Logs => Set<LogEntry>();
-        public DbSet<Hobby> Hobbies => Set<Hobby>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
