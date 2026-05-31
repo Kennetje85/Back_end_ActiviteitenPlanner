@@ -10,7 +10,7 @@ namespace Backend_ActiviteitenPlanner
     {
         public AppDbContext CreateDbContext(string[] args)
         {
-            // Priority: environment variable -> appsettings.json -> Azure SQL fallback
+            // Priority: environment variable -> appsettings.json -> environment-aware fallback
             var envConn = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             var configConn = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -19,9 +19,15 @@ namespace Backend_ActiviteitenPlanner
                 .Build()
                 .GetConnectionString("Default");
 
+            var isProd = string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Production", StringComparison.OrdinalIgnoreCase)
+                         || Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
+            var azureFallback = "Server=tcp:dbhhs.database.windows.net,1433;Initial Catalog=Activiteitenplanner;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\";";
+            var localFallback = "Server=DESKTOP-6C6PF5S\\SQLEXPRESS;Database=ActivityPlanner;Trusted_Connection=True;Encrypt=False;";
+
             var connectionString = envConn
                 ?? configConn
-                ?? "Server=tcp:dbhhs.database.windows.net,1433;Initial Catalog=Activiteitenplanner;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\";";
+                ?? (isProd ? azureFallback : localFallback);
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             optionsBuilder.UseSqlServer(connectionString);
