@@ -6,6 +6,8 @@ on:
     types:
       - completed
 
+
+
 env:
   IMAGE_REGISTRY_URL: ghcr.io
   ###############################################
@@ -18,8 +20,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-
     steps:
       - uses: actions/upload-artifact@v4
         with:
