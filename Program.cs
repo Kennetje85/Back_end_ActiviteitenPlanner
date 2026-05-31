@@ -115,11 +115,12 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
-// DbContext - prefer configuration values (environment / appsettings)
-// Priority: ENV (CONNECTION_STRING) -> appsettings (ConnectionStrings:Default) -> Azure SQL fallback
-var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")
-    ?? builder.Configuration.GetConnectionString("Default")
-    ?? "Server=tcp:dbhhs.database.windows.net,1433;Initial Catalog=Activiteitenplanner;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\";";
+// DbContext - prefer configuration values (appsettings: ConnectionStrings:DefaultConnection)
+// This uses SQL authentication connection strings (User ID / Password) as requested.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("CONNECTION_STRING")
+    ?? throw new InvalidOperationException("Connection string not configured. Set ConnectionStrings:DefaultConnection in appsettings or CONNECTION_STRING env var.");
+
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 // JWT config (use env/config; do not hardcode in production)
