@@ -1,4 +1,4 @@
-name: CI-CD .NET to Azure
+name: Building and Deploying CI-CD .NET to Azure
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 env:
   IMAGE_REGISTRY_URL: ghcr.io
   DOCKER_IMAGE_NAME: kennetje85-azure-ttt
-  AZURE_WEBAPP_NAME: BackendActiviteitenPlanner20260529113158-ttt-app
+  AZURE_WEBAPP_NAME: BackendActiviteitenPlanner20260529113158
 
 jobs:
 
