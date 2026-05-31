@@ -4,7 +4,7 @@ WORKDIR /src
 
 # Copy only the project file first to leverage layer caching
 COPY ["Backend_ActiviteitenPlanner/Backend_ActiviteitenPlanner.csproj", "Backend_ActiviteitenPlanner/"]
-RUN dotnet restore "Backend_ActiviteitenPlanner/Backend_ActiviteitenPlanner.csproj"
+RUN dotnet restore "/Backend_ActiviteitenPlanner.csproj"
 
 # Copy rest of the repo and publish
 COPY . .
