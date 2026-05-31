@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.RateLimiting;
 using Backend_ActiviteitenPlanner;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,6 +13,8 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -113,9 +116,10 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 // DbContext - prefer configuration values (environment / appsettings)
-var connectionString = builder.Configuration.GetConnectionString("Default")
-    ?? Environment.GetEnvironmentVariable("CONNECTION_STRING")
-    ?? "Server=DESKTOP-6C6PF5S\\SQLEXPRESS;Database=ActivityPlanner;Trusted_Connection=True;Encrypt=False;";
+// Priority: ENV (CONNECTION_STRING) -> appsettings (ConnectionStrings:Default) -> Azure SQL fallback
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("Default")
+    ?? "Server=tcp:dbhhs.database.windows.net,1433;Initial Catalog=Activiteitenplanner;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\";";
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 // JWT config (use env/config; do not hardcode in production)
@@ -157,6 +161,40 @@ builder.Services.AddAuthorization();
 
 // Build app
 var app = builder.Build();
+
+// Apply EF Core migrations automatically at startup with basic retry
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var db = services.GetRequiredService<AppDbContext>();
+
+    const int maxAttempts = 5;
+    for (int attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            logger.LogInformation("Attempting database migration (attempt {Attempt}/{Max}).", attempt, maxAttempts);
+            db.Database.Migrate();
+            logger.LogInformation("Database migration completed.");
+            break;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Database migration attempt {Attempt} failed.", attempt);
+            if (attempt == maxAttempts)
+            {
+                logger.LogError(ex, "Exceeded max migration attempts; rethrowing.");
+                throw;
+            }
+
+            // exponential backoff
+            var delaySeconds = Math.Pow(2, attempt);
+            logger.LogInformation("Waiting {Delay}s before retrying migration.", delaySeconds);
+            Thread.Sleep(TimeSpan.FromSeconds(delaySeconds));
+        }
+    }
+}
 
 // Security: HSTS + HTTPS redirect in production
 if (!app.Environment.IsDevelopment())
