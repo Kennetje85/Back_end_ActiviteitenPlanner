@@ -15,7 +15,7 @@ COPY . .
 WORKDIR /src/Backend_ActiviteitenPlanner
 
 # Publish (FIX: correct relative path usage)
-RUN dotnet publish Backend_ActiviteitenPlanner.csproj -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish Backend_ActiviteitenPlanner/Backend_ActiviteitenPlanner.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
