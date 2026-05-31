@@ -2,7 +2,7 @@ name: CI-CD .NET to Azure
 
 on:
   workflow_run:
-    workflows: ["Activiteitenplanner CI"]
+    workflows: ["Activiteitenplanner CiiI"]
     types:
       - completed
 

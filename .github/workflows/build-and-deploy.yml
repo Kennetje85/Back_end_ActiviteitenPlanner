@@ -1,43 +1,60 @@
-name: Activiteitenplanner CI
+name: CI-CD .NET to Azure
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 env:
-  ASPNETCORE_ENVIRONMENT: 'Production'
-  DOTNET_VERSION: '8.0.x'
-  AZURE_WEBAPP_NAME: 'BackendActiviteitenPlanner20260529113158'
-  PUBLISH_DIR: 'publish'
-
+  IMAGE_REGISTRY_URL: ghcr.io
+  DOCKER_IMAGE_NAME: kennetje85-azure-ttt
+  AZURE_WEBAPP_NAME: BackendActiviteitenPlanner20260529113158-ttt-app
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy
+
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: '8.0.x'
 
-      - name: Find project file
-        run: |
-          PROJ=$(find . -name "*.csproj" | head -n 1)
-          echo "PROJECT_PATH=$PROJ" >> $GITHUB_ENV
-          echo "Found project: $PROJ"
+      - run: dotnet restore
 
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.PROJECT_PATH }}
+      - run: dotnet build -c Release
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
+      - run: dotnet publish -c Release -o publish
 
-      - name: Publish
-        run: dotnet publish -c Release -o publish
-      
+  docker:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: |
+          docker build -t ghcr.io/kennetje85/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
+          docker push ghcr.io/kennetje85/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker
+
+    steps:
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          images: ghcr.io/kennetje85/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
