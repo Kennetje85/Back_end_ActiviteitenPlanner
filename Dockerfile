@@ -2,11 +2,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy project file (correct pad!)
+# Copy project file (same structure as yours)
 COPY Backend_ActiviteitenPlanner.csproj Backend_ActiviteitenPlanner/
 
-# Restore
-RUN dotnet restore Backend_ActiviteitenPlanner.csproj
+# Restore (FIX: correct pad naar waar file echt staat)
+RUN dotnet restore Backend_ActiviteitenPlanner/Backend_ActiviteitenPlanner.csproj
 
 # Copy rest of the repo
 COPY . .
@@ -14,7 +14,7 @@ COPY . .
 # Move into project folder
 WORKDIR /src/Backend_ActiviteitenPlanner
 
-# Publish
+# Publish (FIX: correct relative path usage)
 RUN dotnet publish Backend_ActiviteitenPlanner.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime image
