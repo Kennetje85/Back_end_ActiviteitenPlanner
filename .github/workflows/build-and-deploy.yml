@@ -41,8 +41,4 @@ jobs:
       - name: Publish project
         run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -o ${{ env.PUBLISH_DIR }} --no-build
 
-      - name: Upload publish folder
-        uses: actions/upload-artifact@v4
-        with:
-            name: dotnet-app
-            path: publish/
+      

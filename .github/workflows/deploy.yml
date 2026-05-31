@@ -1,91 +1,92 @@
-name: Deploy to production
+name: CI-CD .NET to Azure
 
 on:
-  workflow_run:
-    workflows: ["Activiteitenplanner CI"]
-    types:
-      - completed
-
-
+  push:
+    branches:
+      - main
 
 env:
   IMAGE_REGISTRY_URL: ghcr.io
-  ###############################################
-  ### Replace <username> with GitHub username ###
-  ###############################################
-  DOCKER_IMAGE_NAME: Kennetje85-azure-ttt
+  DOCKER_IMAGE_NAME: kennetje85-azure-ttt
   AZURE_WEBAPP_NAME: BackendActiviteitenPlanner20260529113158-ttt-app
-  ###############################################
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/upload-artifact@v4
-        with:
-          name: webpack artifacts
-          path: public/
 
-  Build-Docker-Image:
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish -c Release -o publish
+
+      - name: Upload publish folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-app
+          path: publish/
+
+
+  docker:
     runs-on: ubuntu-latest
     needs: build
-    name: Build image and store in GitHub Container Registry
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download built artifact
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: webpack artifacts
-          path: public
+          name: dotnet-app
+          path: publish
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.IMAGE_REGISTRY_URL }}
           username: ${{ github.actor }}
-          password: ${{ secrets.CR_PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}
-          tags: |
-            type=sha,format=long,prefix=
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
 
-  Deploy-to-Azure:
+
+  deploy:
     runs-on: ubuntu-latest
-    needs: Build-Docker-Image
-    name: Deploy app container to Azure
+    needs: docker
+
     steps:
-      - name: "Login via Azure CLI"
+      - name: Azure login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - uses: azure/docker-login@v1
-        with:
-          login-server: ${{env.IMAGE_REGISTRY_URL}}
-          username: ${{ github.actor }}
-          password: ${{ secrets.CR_PAT }}
-
-      - name: Deploy web app container
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{env.AZURE_WEBAPP_NAME}}
-          images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}:${{github.sha}}
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          images: ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
 
-      - name: Azure logout via Azure CLI
+      - name: Azure logout
         uses: azure/CLI@v2
         with:
           inlineScript: |
