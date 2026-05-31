@@ -3,10 +3,10 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy project file (correct pad!)
-COPY Backend_ActiviteitenPlanner/Backend_ActiviteitenPlanner.csproj Backend_ActiviteitenPlanner/
+COPY Backend_ActiviteitenPlanner.csproj Backend_ActiviteitenPlanner/
 
 # Restore
-RUN dotnet restore Backend_ActiviteitenPlanner/Backend_ActiviteitenPlanner.csproj
+RUN dotnet restore Backend_ActiviteitenPlanner.csproj
 
 # Copy rest of the repo
 COPY . .
