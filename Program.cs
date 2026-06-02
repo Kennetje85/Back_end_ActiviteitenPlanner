@@ -154,7 +154,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("user", "admin"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("user"));
 });
 
 // Password hasher used by AuthController
