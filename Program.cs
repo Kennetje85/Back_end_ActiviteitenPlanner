@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Backend_ActiviteitenPlanner.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

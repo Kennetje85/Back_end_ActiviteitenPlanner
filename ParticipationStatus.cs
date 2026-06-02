@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Backend_ActiviteitenPlanner
-{ 
-
+{
     public enum ParticipationStatus
 {
     Zeker = 1,

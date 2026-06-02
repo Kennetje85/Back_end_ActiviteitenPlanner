@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
+using Backend_ActiviteitenPlanner.Models;
 
 namespace Backend_ActiviteitenPlanner.Controllers
 {

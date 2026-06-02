@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Backend_ActiviteitenPlanner
+namespace Backend_ActiviteitenPlanner.Models
 {
     public class User
     {

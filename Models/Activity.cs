@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend_ActiviteitenPlanner
+namespace Backend_ActiviteitenPlanner.Models
 {
     public class Activity
     {

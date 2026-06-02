@@ -1,3 +1,4 @@
+using Backend_ActiviteitenPlanner.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // Require authentication for all actions by default
     public class ActivitiesController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -17,6 +19,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
         // GET api/activities
         [HttpGet]
+        [AllowAnonymous] // public read access (override controller-level Authorize)
         public async Task<ActionResult<IEnumerable<ActivityDto>>> GetAll()
         {
             var items = await _db.Activities
@@ -42,6 +45,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [AllowAnonymous] // public read access
         public async Task<ActionResult<Activity>> Get(int id)
         {
             var item = await _db.Activities
@@ -136,6 +140,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "admin")] // only admins may delete
         public async Task<IActionResult> Delete(int id)
         {
             var existing = await _db.Activities.FindAsync(id);
