@@ -59,8 +59,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
         // Accept a CreateActivityDto from the frontend, validate and map to the Activity entity
         [HttpPost]
-        [Authorize(Roles = "admin")] // only admins may create
-        [Authorize(Roles = "user")] // only users may create
+        [Authorize(Roles = "admin,user")] // only admins may create
         public async Task<ActionResult<Activity>> Create([FromBody] CreateActivityDto dto)
         {
             if (dto == null) return BadRequest("Body is required.");
@@ -107,8 +106,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "admin")] // only admins may create
-        [Authorize(Roles = "user")] // only users may create
+        [Authorize(Roles = "admin,user")] // only admins may create
         public async Task<IActionResult> Update(int id, [FromBody] UpdateActivityDto dto)
         {
             if (dto == null) return BadRequest("Body is required.");
@@ -144,8 +142,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "admin")] // only admins may delete
-        [Authorize(Roles = "user")] // only users may create
+        [Authorize(Roles = "admin,user")] // only admins may delete
         public async Task<IActionResult> Delete(int id)
         {
             var existing = await _db.Activities.FindAsync(id);
