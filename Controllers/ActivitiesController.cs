@@ -11,7 +11,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Require authentication for all actions by default
+    //[Authorize] // Require authentication for all actions by default
     public class ActivitiesController : ControllerBase
     {
         private readonly AppDbContext _db;
