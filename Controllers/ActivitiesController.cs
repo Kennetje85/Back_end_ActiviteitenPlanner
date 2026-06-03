@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Backend_ActiviteitenPlanner.Controllers
 {
+    [Authorize] // Require authentication for all actions in this controller (adjust as needed)
     [ApiController]
     [Route("api/[controller]")]
     public class ActivitiesController : ControllerBase
