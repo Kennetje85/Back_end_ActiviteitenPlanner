@@ -1,21 +1,23 @@
-﻿using System;
+﻿using Backend_ActiviteitenPlanner;
+using Backend_ActiviteitenPlanner.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IO;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.RateLimiting;
-using Backend_ActiviteitenPlanner;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Backend_ActiviteitenPlanner.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +71,8 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
+
+
     });
 });
 
@@ -197,6 +201,12 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
+
+
+
+leClaimType = ClaimTypes.Role
+};
+
 
 // Security: HSTS + HTTPS redirect in production
 if (!app.Environment.IsDevelopment())
