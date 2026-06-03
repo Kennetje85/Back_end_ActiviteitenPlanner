@@ -137,7 +137,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false; // production: true
+    options.RequireHttpsMetadata = true; // production: true
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
@@ -154,7 +154,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("user"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("admin,user"));
 });
 
 // Password hasher used by AuthController
@@ -177,7 +177,7 @@ using (var scope = app.Services.CreateScope())
         try
         {
             logger.LogInformation("Attempting database migration (attempt {Attempt}/{Max}).", attempt, maxAttempts);
-            db.Database.Migrate();
+           // db.Database.Migrate();
             logger.LogInformation("Database migration completed.");
             break;
         }

@@ -11,7 +11,6 @@ namespace Backend_ActiviteitenPlanner.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize] // Require authentication for all actions by default
     public class ActivitiesController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -19,7 +18,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
         // GET api/activities
         [HttpGet]
-        [AllowAnonymous] // public read access (override controller-level Authorize)
+        [Authorize(Roles = "admin,user")]
         public async Task<ActionResult<IEnumerable<ActivityDto>>> GetAll()
         {
             var items = await _db.Activities
@@ -45,7 +44,8 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpGet("{id:int}")]
-        [AllowAnonymous] // public read access
+        [Authorize(Roles = "admin,user")]
+
         public async Task<ActionResult<Activity>> Get(int id)
         {
             var item = await _db.Activities
@@ -59,7 +59,8 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
         // Accept a CreateActivityDto from the frontend, validate and map to the Activity entity
         [HttpPost]
-        [Authorize(Roles = "admin,user")] // only admins may create
+        [Authorize(Roles = "admin,user")]
+        // Allow unauthenticated users to create activities (optional, adjust as needed)
         public async Task<ActionResult<Activity>> Create([FromBody] CreateActivityDto dto)
         {
             if (dto == null) return BadRequest("Body is required.");
@@ -106,7 +107,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "admin,user")] // only admins may create
+        [Authorize(Roles = "admin,user")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateActivityDto dto)
         {
             if (dto == null) return BadRequest("Body is required.");
@@ -142,7 +143,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "admin,user")] // only admins may delete
+        [Authorize(Roles = "admin,user")]
         public async Task<IActionResult> Delete(int id)
         {
             var existing = await _db.Activities.FindAsync(id);
