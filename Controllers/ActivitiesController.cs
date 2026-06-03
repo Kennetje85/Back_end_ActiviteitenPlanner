@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Backend_ActiviteitenPlanner.Controllers
 {
-    [Authorize(Roles = "user")] // Require authentication for all actions in this controller (adjust as needed)
+     // Require authentication for all actions in this controller (adjust as needed)
     [ApiController]
     [Route("api/[controller]")]
     public class ActivitiesController : ControllerBase
@@ -17,6 +17,8 @@ namespace Backend_ActiviteitenPlanner.Controllers
         private readonly AppDbContext _db;
         public ActivitiesController(AppDbContext db) => _db = db;
 
+
+        [Authorize(Roles = "user")]
         // GET api/activities
         [HttpGet]
        
@@ -44,6 +46,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
             return Ok(dtos);
         }
 
+        [Authorize(Roles = "user")]
         [HttpGet("{id:int}")]
         
 
@@ -108,7 +111,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "admin,user")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateActivityDto dto)
         {
             if (dto == null) return BadRequest("Body is required.");
@@ -144,7 +147,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "admin,user")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> Delete(int id)
         {
             var existing = await _db.Activities.FindAsync(id);
