@@ -18,7 +18,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
         // GET api/activities
         [HttpGet]
-        [Authorize(Roles = "admin,user")]
+       
         public async Task<ActionResult<IEnumerable<ActivityDto>>> GetAll()
         {
             var items = await _db.Activities
@@ -44,7 +44,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "admin,user")]
+        
 
         public async Task<ActionResult<Activity>> Get(int id)
         {
@@ -59,7 +59,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
         // Accept a CreateActivityDto from the frontend, validate and map to the Activity entity
         [HttpPost]
-        [Authorize(Roles = "admin,user")]
+        [Authorize(Roles = "user")]
         // Allow unauthenticated users to create activities (optional, adjust as needed)
         public async Task<ActionResult<Activity>> Create([FromBody] CreateActivityDto dto)
         {
