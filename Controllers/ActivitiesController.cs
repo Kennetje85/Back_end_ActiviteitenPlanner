@@ -63,7 +63,8 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
         // Accept a CreateActivityDto from the frontend, validate and map to the Activity entity
         [HttpPost]
-        
+        [Authorize(Roles = "userr")]
+
         // Allow unauthenticated users to create activities (optional, adjust as needed)
         public async Task<ActionResult<Activity>> Create([FromBody] CreateActivityDto dto)
         {
