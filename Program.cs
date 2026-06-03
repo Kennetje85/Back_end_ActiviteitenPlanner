@@ -204,8 +204,8 @@ using (var scope = app.Services.CreateScope())
 
 
 
-leClaimType = ClaimTypes.Role
-};
+
+
 
 
 // Security: HSTS + HTTPS redirect in production
