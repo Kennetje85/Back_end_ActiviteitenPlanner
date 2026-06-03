@@ -125,7 +125,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 // JWT config (use env/config; do not hardcode in production)
-var jwtKey = builder.Configuration["Jwt:Key"] ?? Environment.GetEnvironmentVariable("JWT__Key") ?? "ThisIsADevSecretKeyChangeMe!";
+var jwtKey = builder.Configuration["Jwt:Key"] ?? Environment.GetEnvironmentVariable("JWT__Key") ?? "MySuperSecretDevKey1234567890ABCDEF!";
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "Backend_ActiviteitenPlanner";
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
 
