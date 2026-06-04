@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.RateLimiting;
 
@@ -127,6 +128,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string not configured. Set ConnectionStrings:DefaultConnection in appsettings or CONNECTION_STRING env var.");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
+
 
 // JWT config (use env/config; do not hardcode in production)
 var jwtKey = builder.Configuration["Jwt:Key"] ?? Environment.GetEnvironmentVariable("JWT__Key") ?? "MySuperSecretDevKey1234567890ABCDEF!";
