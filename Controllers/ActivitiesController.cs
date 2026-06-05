@@ -110,7 +110,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
             return CreatedAtAction(nameof(Get), new { id = activity.Id }, activity);
         }
-
+        //Test
         [HttpPut("{id:int}")]
         [Authorize(Roles = "user")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateActivityDto dto)

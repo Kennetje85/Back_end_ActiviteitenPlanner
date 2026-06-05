@@ -9,16 +9,21 @@ using Microsoft.EntityFrameworkCore;
 namespace Backend_ActiviteitenPlanner
 
 {
+
+    //DbContext class die de database verbindt met de applicatie en de tabellen definieert
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        //dbsets tabellen.
         public DbSet<User> Users => Set<User>();
         public DbSet<Activity> Activities => Set<Activity>();
         public DbSet<Registration> Registrations => Set<Registration>();
         public DbSet<Poll> Polls => Set<Poll>();
         public DbSet<LogEntry> Logs => Set<LogEntry>();
 
+
+        //Ontvangt instellingen voor de databaseverbinding en configureert deze indien nodig
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -26,6 +31,10 @@ namespace Backend_ActiviteitenPlanner
                 optionsBuilder.UseSqlServer("Server=DESKTOP-6C6PF5S\\SQLEXPRESS;Database=ActivityPlanner;Trusted_Connection=True;Encrypt=True;");
             }
         }
+
+
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
