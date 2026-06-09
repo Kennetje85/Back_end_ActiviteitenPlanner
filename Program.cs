@@ -133,6 +133,9 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        //fix bug
+        options.JsonSerializerOptions.ReferenceHandler =
+         System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
 
