@@ -18,7 +18,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         public ActivitiesController(AppDbContext db) => _db = db;
 
 
-        //[Authorize(Roles = "user")]
+        [Authorize(Roles = "user")]
         // GET api/activities
         [HttpGet]
        
@@ -62,7 +62,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
         // Accept a CreateActivityDto from the frontend, validate and map to the Activity entity
         [HttpPost]
-        //[Authorize(Roles = "user")]
+        [Authorize(Roles = "user")]
 
         // Allow unauthenticated users to create activities (optional, adjust as needed)
         public async Task<ActionResult<Activity>> Create([FromBody] CreateActivityDto dto)
@@ -111,7 +111,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
         //Test
         [HttpPut("{id:int}")]
-        //[Authorize(Roles = "user")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateActivityDto dto)
         {
             if (dto == null) return BadRequest("Body is required.");
@@ -147,7 +147,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        //[Authorize(Roles = "user")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> Delete(int id)
         {
             var existing = await _db.Activities.FindAsync(id);
