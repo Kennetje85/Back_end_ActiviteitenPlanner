@@ -11,8 +11,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove=".github\**" />
+    <Content Remove=".github\**" />
+    <EmbeddedResource Remove=".github\**" />
+    <None Remove=".github\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Do not compile the Dockerfile as C# -->
-    <None Include=".github\workflow\build-test-deploy.yml" />
     <None Include="bin\Debug\net8.0\Azure.Core.dll" />
     <None Include="bin\Debug\net8.0\Azure.Identity.dll" />
     <None Include="bin\Debug\net8.0\Backend_ActiviteitenPlanner.dll" />
