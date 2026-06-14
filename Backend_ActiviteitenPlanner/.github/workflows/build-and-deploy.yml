@@ -1,0 +1,84 @@
+name: Building and Deploying CI-CD .NET to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_REGISTRY_URL: ghcr.io
+  DOCKER_IMAGE_NAME: kennetje85-azure-ttt
+  AZURE_WEBAPP_NAME: BackendActiviteitenPlanner20260529113158
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet restore
+
+      - run: dotnet build -c Release
+
+      - run: dotnet publish -c Release -o publish
+  
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run xUnit tests
+        run: dotnet test TestProjectActivteitenplanner/TestProjectActivteitenplanner.csproj -c Release --no-restore --verbosity normal
+
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: |
+          docker build -t ghcr.io/kennetje85/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
+          docker push ghcr.io/kennetje85/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker
+
+    steps:
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          images: ghcr.io/kennetje85/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
