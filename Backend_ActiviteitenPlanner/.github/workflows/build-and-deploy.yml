@@ -9,6 +9,7 @@ permissions:
   contents: read
   packages: write
 
+
 env:
   IMAGE_REGISTRY_URL: ghcr.io
   DOCKER_IMAGE_NAME: kennetje85-azure-ttt
