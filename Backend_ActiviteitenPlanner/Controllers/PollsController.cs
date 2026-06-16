@@ -1,10 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Backend_ActiviteitenPlanner.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Backend_ActiviteitenPlanner.Controllers
 {
@@ -203,7 +204,9 @@ namespace Backend_ActiviteitenPlanner.Controllers
     {
         public int ActivityId { get; set; }
         public int? UserId { get; set; }          // preferred when frontend knows the user id
+        [Required(ErrorMessage = "UserEmail is required if UserId is not provided")]
         public string? UserEmail { get; set; }    // alternative: resolve user by email
+        [Required(ErrorMessage = "Rating is required")]
         public int Rating { get; set; }           // 1..5
     }
 

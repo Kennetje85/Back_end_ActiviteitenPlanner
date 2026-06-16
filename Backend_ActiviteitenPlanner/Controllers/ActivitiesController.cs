@@ -165,9 +165,10 @@ namespace Backend_ActiviteitenPlanner.Controllers
         public string Title { get; set; } = null!;
         [Required(ErrorMessage = "Description is required")]
         public string? Description { get; set; }
+        [Required(ErrorMessage = "Date is required")]
         public string? Date { get; set; }
+        [Required(ErrorMessage = "Time is required")]
         public string? Time { get; set; }
-
         [Required(ErrorMessage = "Location is required")]
         [MinLength(1, ErrorMessage = "Location must not be empty")]
         [RegularExpression(@"\S+.*", ErrorMessage = "Location must contain non-whitespace characters")]
