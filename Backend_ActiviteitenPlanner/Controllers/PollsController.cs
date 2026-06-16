@@ -1,4 +1,5 @@
 using Backend_ActiviteitenPlanner.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -51,6 +52,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
             return Ok(polls);
         }
 
+        [Authorize(Roles = "user")]
         // GET /api/polls/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<PollDto>> GetPoll(int id)
@@ -74,7 +76,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
             if (poll == null) return NotFound();
             return Ok(poll);
         }
-
+        [Authorize(Roles = "user")]
         // POST /api/polls
         [HttpPost]
         public async Task<ActionResult<PollDto>> CreatePoll([FromBody] CreatePollDto dto)
@@ -145,6 +147,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
             return CreatedAtAction(nameof(GetPoll), new { id = poll.Id }, result);
         }
 
+        [Authorize(Roles = "user")]
         // PATCH /api/polls/{id}
         [HttpPatch("{id:int}")]
         public async Task<ActionResult<PollDto>> UpdatePoll(int id, [FromBody] UpdatePollDto dto)
@@ -177,6 +180,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "user")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeletePoll(int id)
         {
