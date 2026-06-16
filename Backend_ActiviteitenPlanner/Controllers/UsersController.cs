@@ -98,7 +98,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
                     new Claim(ClaimTypes.Role, user.Role ?? "user"),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
-
+                //Hier staat hoelang de token geldig is, nu 8 uur, maar kan aangepast worden naar wens
                 var token = new JwtSecurityToken(
                     issuer: jwtIssuer,
                     audience: jwtIssuer,
