@@ -42,8 +42,11 @@ namespace Backend_ActiviteitenPlanner.Controllers
                 PollCount = a.Polls?.Count ?? 0,
                 AverageRating = a.Polls != null && a.Polls.Any() ? a.Polls.Average(p => p.Rating) : 0.0
             }).ToList();
-
-            return Ok(dtos);
+            return Ok(new
+            {
+                message = "Activities retrieved successfully",
+                data = dtos
+            });
         }
 
         //[Authorize(Roles = "user")]
@@ -57,7 +60,11 @@ namespace Backend_ActiviteitenPlanner.Controllers
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(a => a.Id == id);
             if (item == null) return NotFound();
-            return Ok(item);
+            return Ok(new
+            {
+                message = "Activity found",
+                data = item
+            });
         }
 
         // Accept a CreateActivityDto from the frontend, validate and map to the Activity entity
@@ -106,8 +113,13 @@ namespace Backend_ActiviteitenPlanner.Controllers
 
             _db.Activities.Add(activity);
             await _db.SaveChangesAsync();
+            return CreatedAtAction(nameof(Get),new { id = activity.Id },
+            new
+            {
+            message = $"Created activity with ID {activity.Id}",
+            data = activity
+            });
 
-            return CreatedAtAction(nameof(Get), new { id = activity.Id }, activity);
         }
         //Test
         [HttpPut("{id:int}")]
