@@ -123,11 +123,22 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 // DbContext - prefer configuration values (appsettings: ConnectionStrings:DefaultConnection)
 // This uses SQL authentication connection strings (User ID / Password) as requested.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? Environment.GetEnvironmentVariable("CONNECTION_STRING")
-    ?? throw new InvalidOperationException("Connection string not configured. Set ConnectionStrings:DefaultConnection in appsettings or CONNECTION_STRING env var.");
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+}
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "Connection string not configured.");
+}
+
+builder.Services.AddDbContext<AppDbContext>(
+    options => options.UseSqlServer(connectionString));
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
