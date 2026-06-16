@@ -18,6 +18,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         public PollsController(AppDbContext db) => _db = db;
 
         // GET /api/polls?activityId=2&userEmail=...
+        [Authorize(Roles = "user")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PollDto>>> GetPolls([FromQuery] int? activityId = null, [FromQuery] string? userEmail = null)
         {
