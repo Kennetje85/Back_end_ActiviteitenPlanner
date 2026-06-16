@@ -42,11 +42,8 @@ namespace Backend_ActiviteitenPlanner.Controllers
                 PollCount = a.Polls?.Count ?? 0,
                 AverageRating = a.Polls != null && a.Polls.Any() ? a.Polls.Average(p => p.Rating) : 0.0
             }).ToList();
-            return Ok(new
-            {
-                message = "Activities retrieved successfully",
-                data = dtos
-            });
+
+            return Ok(dtos);
         }
 
         //[Authorize(Roles = "user")]
