@@ -163,7 +163,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
     {
         [Required(ErrorMessage = "Title is required")]
         public string Title { get; set; } = null!;
-
+        [Required(ErrorMessage = "Description is required")]
         public string? Description { get; set; }
         public string? Date { get; set; }
         public string? Time { get; set; }
