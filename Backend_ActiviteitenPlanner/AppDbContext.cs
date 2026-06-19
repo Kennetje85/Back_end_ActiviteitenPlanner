@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Backend_ActiviteitenPlanner.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Backend_ActiviteitenPlanner.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Backend_ActiviteitenPlanner
 
@@ -15,7 +16,7 @@ namespace Backend_ActiviteitenPlanner
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        //dbsets tabellen.
+        //dbsets tabellen. Startpunt van crud-operaties.
         public DbSet<User> Users => Set<User>();
         public DbSet<Activity> Activities => Set<Activity>();
         public DbSet<Registration> Registrations => Set<Registration>();
@@ -24,13 +25,13 @@ namespace Backend_ActiviteitenPlanner
 
 
         //Ontvangt instellingen voor de databaseverbinding en configureert deze indien nodig
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer("Server=DESKTOP-6C6PF5S\\SQLEXPRESS;Database=ActivityPlanner;Trusted_Connection=True;Encrypt=True;");
-            }
-        }
+      //  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+      //  {
+      //      if (!optionsBuilder.IsConfigured)
+      //      {
+      //          optionsBuilder.UseSqlServer("Server=DESKTOP-6C6PF5S\\SQLEXPRESS;Database=ActivityPlanner;Trusted_Connection=True;Encrypt=True;");
+      //      }
+      //  }
 
 
 
@@ -39,6 +40,9 @@ namespace Backend_ActiviteitenPlanner
         {
             base.OnModelCreating(modelBuilder);
 
+
+
+            //Maakt een unieke index op Email. 2 gebruikers mogen niet dezelfde email hebben.
             modelBuilder.Entity<User>()
                 .HasIndex(x => x.Email)
                 .IsUnique();
@@ -56,6 +60,10 @@ namespace Backend_ActiviteitenPlanner
 
             modelBuilder.Entity<Poll>()
                 .ToTable(t => t.HasCheckConstraint("CK_Poll_Rating", "[Rating] >= 1 AND [Rating] <= 5"));
+
+            //Eén Activity heeft één maker(CreatedByUser).
+            //Eén User kan meerdere activiteiten hebben gemaakt(CreatedActivities).
+            //De foreign key is CreatedByUserId.
 
             modelBuilder.Entity<Activity>()
                 .HasOne(x => x.CreatedByUser)

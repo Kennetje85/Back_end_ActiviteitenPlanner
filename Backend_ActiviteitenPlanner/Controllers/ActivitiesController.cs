@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Backend_ActiviteitenPlanner.Controllers
 {
@@ -21,7 +23,6 @@ namespace Backend_ActiviteitenPlanner.Controllers
         [Authorize(Roles = "user")]
         // GET api/activities
         [HttpGet]
-       
         public async Task<ActionResult<IEnumerable<ActivityDto>>> GetAll()
         {
             var items = await _db.Activities
@@ -69,6 +70,7 @@ namespace Backend_ActiviteitenPlanner.Controllers
         [Authorize(Roles = "user")]
 
         // Allow unauthenticated users to create activities (optional, adjust as needed)
+        //ASP.NET leest de JSON uit de request body en zet die om naar een C#-object.
         public async Task<ActionResult<Activity>> Create([FromBody] CreateActivityDto dto)
         {
             if (dto == null) return BadRequest("Body is required.");
@@ -97,6 +99,11 @@ namespace Backend_ActiviteitenPlanner.Controllers
                 Image = dto.Image ?? ""
             };
 
+            //voorbeeld
+
+            //Als de frontend al een CreatedByUserId meestuurt ? gebruik die.
+           // Anders, als er een e-mailadres is meegestuurd ? zoek de gebruiker op basis van dat e-mailadres.
+            //Als er geen gebruiker gevonden wordt ? laat CreatedByUserId leeg.
             // If frontend sent CreatedByUserId, use it. Otherwise, try resolve by email if provided.
             if (dto.CreatedByUserId.HasValue)
             {
